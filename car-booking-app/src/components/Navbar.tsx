@@ -1,8 +1,15 @@
-'use client';
+"use client";
 
-import { AppBar, Toolbar, Typography, Menu, MenuItem, Button } from '@mui/material';
-import { useAuth } from '@/context/AuthContext';
-import React, { useState } from 'react';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Menu,
+  MenuItem,
+  Button,
+} from "@mui/material";
+import { useAuth } from "@/context/AuthContext";
+import React, { useState } from "react";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -24,7 +31,7 @@ export default function Navbar() {
         </Typography>
         {user ? (
           <>
-            <Button color="black" onClick={handleMenuClick}>
+            <Button onClick={handleMenuClick} sx={{ color: "#FFFFFF" }}>
               {user.email}
             </Button>
             <Menu
@@ -32,7 +39,14 @@ export default function Navbar() {
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              <MenuItem onClick={() => { handleClose(); logout(); }}>Logout</MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handleClose();
+                  logout();
+                }}
+              >
+                Logout
+              </MenuItem>
             </Menu>
           </>
         ) : (
