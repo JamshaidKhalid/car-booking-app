@@ -1,26 +1,40 @@
 'use client'
-import { useState, useEffect } from 'react';
-import { Container, Box, Typography, Button, TextField, Grid, Paper, IconButton } from '@mui/material';
-import { Formik, Form, Field } from 'formik';
-import * as Yup from 'yup';
-import toast, { Toaster } from 'react-hot-toast';
-import api from '@/utils/api';
-import { useProtectedRoute } from '@/hooks/useAuth';
-import VehicleTable from '@/components/VehicleTable';
-import DeleteIcon from '@mui/icons-material/Delete';
-import Image from 'next/image';
+import { useState, useEffect } from "react";
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  TextField,
+  Grid,
+  Paper,
+  IconButton,
+} from "@mui/material";
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
+import toast, { Toaster } from "react-hot-toast";
+import api from "@/utils/api";
+import { useProtectedRoute } from "@/hooks/useAuth";
+import VehicleTable from "@/components/VehicleTable";
+import DeleteIcon from "@mui/icons-material/Delete";
 
+// Validation schema for the form
 const VehicleSchema = Yup.object().shape({
-  carModel: Yup.string().required('Required'),
-  price: Yup.number().typeError('Price should be a number').positive('Price should be a positive number').required('Required'),
-  phone: Yup.string().length(11, 'Must be exactly 11 digits').required('Required'),
-  city: Yup.string().required('Required'),
-  maxPictures: Yup.number().min(1).max(10).required('Required'),
-  images: Yup.mixed().required('You need to provide at least one image'), 
+  carModel: Yup.string().required("Required"),
+  price: Yup.number()
+    .typeError("Price should be a number")
+    .positive("Price should be a positive number")
+    .required("Required"),
+  phone: Yup.string()
+    .length(11, "Must be exactly 11 digits")
+    .required("Required"),
+  city: Yup.string().required("Required"),
+  maxPictures: Yup.number().min(1).max(10).required("Required"),
+  images: Yup.array().min(1, "You need to provide at least one image").required("Required"),
 });
 
 export default function AddVehicle() {
-  useProtectedRoute(); 
+  useProtectedRoute();
 
   const [vehicles, setVehicles] = useState([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -31,16 +45,20 @@ export default function AddVehicle() {
 
   const fetchVehicles = async () => {
     try {
-      const response = await api.get('/vehicle', {
-        headers: { Authorization: `${localStorage.getItem('token')}` },
+      const response = await api.get("/vehicle", {
+        headers: { Authorization: `${localStorage.getItem("token")}` },
       });
       setVehicles(response.data);
     } catch {
-      toast.error('Failed to fetch vehicles');
+      toast.error("Failed to fetch vehicles");
     }
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, maxPictures: number) => {
+  const handleFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    maxPictures: number,
+    setFieldValue: any // Add setFieldValue as parameter
+  ) => {
     const files = Array.from(event.target.files || []);
     
     if (files.length !== maxPictures) {
@@ -49,12 +67,14 @@ export default function AddVehicle() {
     }
 
     setImageFiles(files);
+    setFieldValue("images", files); // Update Formik's images field
   };
 
-  const removeImage = (index: number) => {
+  const removeImage = (index: number, setFieldValue: any) => {
     const updatedImages = [...imageFiles];
     updatedImages.splice(index, 1);
     setImageFiles(updatedImages);
+    setFieldValue("images", updatedImages); // Update Formik's images field
   };
 
   const handleSubmit = async (values: any) => {
@@ -64,25 +84,25 @@ export default function AddVehicle() {
     }
 
     const formData = new FormData();
-    formData.append('carModel', values.carModel);
-    formData.append('price', values.price.toString());
-    formData.append('phone', values.phone);
-    formData.append('city', values.city);
-    formData.append('maxPictures', values.maxPictures.toString());
-    imageFiles.forEach((file) => formData.append('images', file));
+    formData.append("carModel", values.carModel);
+    formData.append("price", values.price.toString());
+    formData.append("phone", values.phone);
+    formData.append("city", values.city);
+    formData.append("maxPictures", values.maxPictures.toString());
+    imageFiles.forEach((file) => formData.append("images", file));
 
     try {
-      await api.post('/vehicle', formData, {
+      await api.post("/vehicle", formData, {
         headers: {
-          Authorization: `${localStorage.getItem('token')}`,
-          'Content-Type': 'multipart/form-data',
+          Authorization: `${localStorage.getItem("token")}`,
+          "Content-Type": "multipart/form-data",
         },
       });
-      toast.success('Vehicle added successfully');
+      toast.success("Vehicle added successfully");
       setImageFiles([]);
       fetchVehicles();
     } catch {
-      toast.error('Failed to add vehicle');
+      toast.error("Failed to add vehicle");
     }
   };
 
@@ -96,12 +116,12 @@ export default function AddVehicle() {
         <Paper elevation={3} sx={{ p: 3 }}>
           <Formik
             initialValues={{
-              carModel: '',
-              price: '',
-              phone: '',
-              city: '',
-              maxPictures: '',
-              images: null, 
+              carModel: "",
+              price: "",
+              phone: "",
+              city: "",
+              maxPictures: "",
+              images: [],
             }}
             validationSchema={VehicleSchema}
             onSubmit={handleSubmit}
@@ -165,40 +185,49 @@ export default function AddVehicle() {
                       variant="outlined"
                       component="label"
                       size="small"
-                      sx={{ mt: 2, padding: '6px 12px', fontSize: '0.875rem' }}
+                      sx={{ mt: 2, padding: "6px 12px", fontSize: "0.875rem" }}
                     >
                       Choose Files
                       <input
                         type="file"
                         multiple
                         hidden
-                        onChange={(e) => handleFileChange(e, Number(values.maxPictures))} // Convert to number here
+                        onChange={(e) =>
+                          handleFileChange(e, Number(values.maxPictures), setFieldValue)
+                        } // Convert to number here and update Formik's images
                       />
                     </Button>
-                    {errors.images && touched.images && <div style={{ color: 'red' }}>{errors.images}</div>}
+                    {errors.images && touched.images && (
+                      <div style={{ color: "red" }}>{errors.images}</div>
+                    )}
                   </Grid>
                   <Grid item xs={12}>
                     <Box display="flex" flexWrap="wrap" gap={2} mt={2}>
                       {imageFiles.map((file, index) => (
-                        <Box key={index} position="relative" width="80px" height="80px">
-                          <Image
+                        <Box
+                          key={index}
+                          position="relative"
+                          width="80px"
+                          height="80px"
+                        >
+                          <img
                             src={URL.createObjectURL(file)}
                             alt="Selected"
                             style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                              borderRadius: '8px',
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                              borderRadius: "8px",
                             }}
                           />
                           <IconButton
                             size="small"
-                            onClick={() => removeImage(index)}
+                            onClick={() => removeImage(index, setFieldValue)}
                             sx={{
-                              position: 'absolute',
+                              position: "absolute",
                               top: -10,
                               right: -10,
-                              backgroundColor: 'white',
+                              backgroundColor: "white",
                             }}
                           >
                             <DeleteIcon fontSize="small" color="error" />
@@ -208,7 +237,12 @@ export default function AddVehicle() {
                     </Box>
                   </Grid>
                 </Grid>
-                <Button type="submit" variant="contained" size="small" sx={{ mt: 3, padding: '6px 12px', fontSize: '0.875rem' }}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="small"
+                  sx={{ mt: 3, padding: "6px 12px", fontSize: "0.875rem" }}
+                >
                   Add Vehicle
                 </Button>
               </Form>
