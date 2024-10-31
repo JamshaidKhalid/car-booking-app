@@ -10,23 +10,21 @@ import VehicleTable from '@/components/VehicleTable';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Image from 'next/image';
 
-// Validation schema for the form
 const VehicleSchema = Yup.object().shape({
   carModel: Yup.string().required('Required'),
   price: Yup.number().typeError('Price should be a number').positive('Price should be a positive number').required('Required'),
   phone: Yup.string().length(11, 'Must be exactly 11 digits').required('Required'),
   city: Yup.string().required('Required'),
   maxPictures: Yup.number().min(1).max(10).required('Required'),
-  images: Yup.mixed().required('You need to provide at least one image'), // Add validation for images
+  images: Yup.mixed().required('You need to provide at least one image'), 
 });
 
 export default function AddVehicle() {
-  useProtectedRoute(); // Protect the route
+  useProtectedRoute(); 
 
   const [vehicles, setVehicles] = useState([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
 
-  // Fetch vehicles on component mount
   useEffect(() => {
     fetchVehicles();
   }, []);
@@ -45,7 +43,6 @@ export default function AddVehicle() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, maxPictures: number) => {
     const files = Array.from(event.target.files || []);
     
-    // Validate selected files against maxPictures
     if (files.length !== maxPictures) {
       toast.error(`Please select exactly ${maxPictures} images`);
       return;
@@ -82,8 +79,8 @@ export default function AddVehicle() {
         },
       });
       toast.success('Vehicle added successfully');
-      setImageFiles([]); // Clear selected images after successful submission
-      fetchVehicles(); // Refresh the list after adding
+      setImageFiles([]);
+      fetchVehicles();
     } catch {
       toast.error('Failed to add vehicle');
     }
@@ -104,7 +101,7 @@ export default function AddVehicle() {
               phone: '',
               city: '',
               maxPictures: '',
-              images: null, // Add images to initial values
+              images: null, 
             }}
             validationSchema={VehicleSchema}
             onSubmit={handleSubmit}

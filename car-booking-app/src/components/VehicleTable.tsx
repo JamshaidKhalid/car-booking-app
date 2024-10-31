@@ -1,5 +1,14 @@
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
-import Image from 'next/image';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+} from "@mui/material";
+import Image from "next/image";
 
 interface Vehicle {
   carModel: string;
@@ -12,7 +21,9 @@ interface Vehicle {
 export default function VehicleTable({ vehicles }: { vehicles: Vehicle[] }) {
   return (
     <TableContainer component={Paper} sx={{ mt: 4 }}>
-      <Typography variant="h5" sx={{ p: 2 }}>Vehicle List</Typography>
+      <Typography variant="h5" sx={{ p: 2 }}>
+        Vehicle List
+      </Typography>
       <Table>
         <TableHead>
           <TableRow>
@@ -36,7 +47,9 @@ export default function VehicleTable({ vehicles }: { vehicles: Vehicle[] }) {
                     key={imgIndex}
                     src={image.url}
                     alt={image.fileName}
-                    style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                    width={50} // Set the desired width
+                    height={50} // Set the desired height
+                    style={{ marginRight: "5px", borderRadius: "4px" }} // Optional styling
                   />
                 ))}
               </TableCell>

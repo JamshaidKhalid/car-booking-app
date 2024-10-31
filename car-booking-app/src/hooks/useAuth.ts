@@ -8,7 +8,11 @@ export const useProtectedRoute = (redirectTo: string = '/login') => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.replace(redirectTo);
+      router.push(redirectTo);
+    }
+
+    if (isAuthenticated && redirectTo === '/login') {
+      router.push('/vehicle');
     }
   }, [isAuthenticated, router, redirectTo]);
 };
