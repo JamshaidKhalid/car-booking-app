@@ -24,7 +24,7 @@ export default function Navbar() {
         </Typography>
         {user ? (
           <>
-            <Button color="" onClick={handleMenuClick}>
+            <Button onClick={handleMenuClick}>
               {user.email}
             </Button>
             <Menu

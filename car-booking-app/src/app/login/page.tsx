@@ -16,9 +16,7 @@ const LoginSchema = Yup.object().shape({
 
 export default function Login() {
   const { login, isAuthenticated } = useAuth();
-
   const router = useRouter();
-
   useEffect(() => {
     if (isAuthenticated) {
       router.replace('/vehicle'); 

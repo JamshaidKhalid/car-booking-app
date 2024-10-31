@@ -1,7 +1,6 @@
-'use client';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+'use client'
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import api from '@/utils/api';
 import toast from 'react-hot-toast';
 
 interface AuthContextType {
@@ -11,18 +10,12 @@ interface AuthContextType {
   isAuthenticated: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<any>(null);
-  const router = useRouter();
   const isAuthenticated = Boolean(user);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const email = localStorage.getItem('userEmail');
-    if (token && email) setUser({ email });
-  }, []);
+  const router = useRouter();
 
   const login = (token: string, userEmail: string) => {
     localStorage.setItem('token', token);
@@ -40,6 +33,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     router.push('/login');
   };
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const email = localStorage.getItem('userEmail');
+    if (token && email) setUser({ email });
+  }, []);
+
   return (
     <AuthContext.Provider value={{ user, login, logout, isAuthenticated }}>
       {children}
@@ -47,4 +46,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

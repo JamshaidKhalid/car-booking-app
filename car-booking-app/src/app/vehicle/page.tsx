@@ -1,5 +1,4 @@
-'use client';
-
+'use client'
 import { useState, useEffect } from 'react';
 import { Container, Box, Typography, Button, TextField, Grid, Paper, IconButton } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
@@ -9,21 +8,25 @@ import api from '@/utils/api';
 import { useProtectedRoute } from '@/hooks/useAuth';
 import VehicleTable from '@/components/VehicleTable';
 import DeleteIcon from '@mui/icons-material/Delete';
+import Image from 'next/image';
 
+// Validation schema for the form
 const VehicleSchema = Yup.object().shape({
   carModel: Yup.string().required('Required'),
   price: Yup.number().typeError('Price should be a number').positive('Price should be a positive number').required('Required'),
   phone: Yup.string().length(11, 'Must be exactly 11 digits').required('Required'),
   city: Yup.string().required('Required'),
   maxPictures: Yup.number().min(1).max(10).required('Required'),
+  images: Yup.mixed().required('You need to provide at least one image'), // Add validation for images
 });
 
 export default function AddVehicle() {
-  useProtectedRoute();
+  useProtectedRoute(); // Protect the route
 
   const [vehicles, setVehicles] = useState([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
 
+  // Fetch vehicles on component mount
   useEffect(() => {
     fetchVehicles();
   }, []);
@@ -42,6 +45,7 @@ export default function AddVehicle() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, maxPictures: number) => {
     const files = Array.from(event.target.files || []);
     
+    // Validate selected files against maxPictures
     if (files.length !== maxPictures) {
       toast.error(`Please select exactly ${maxPictures} images`);
       return;
@@ -78,8 +82,8 @@ export default function AddVehicle() {
         },
       });
       toast.success('Vehicle added successfully');
-      setImageFiles([]); 
-      fetchVehicles(); 
+      setImageFiles([]); // Clear selected images after successful submission
+      fetchVehicles(); // Refresh the list after adding
     } catch {
       toast.error('Failed to add vehicle');
     }
@@ -100,6 +104,7 @@ export default function AddVehicle() {
               phone: '',
               city: '',
               maxPictures: '',
+              images: null, // Add images to initial values
             }}
             validationSchema={VehicleSchema}
             onSubmit={handleSubmit}
@@ -170,7 +175,7 @@ export default function AddVehicle() {
                         type="file"
                         multiple
                         hidden
-                        onChange={(e) => handleFileChange(e, values.maxPictures)}
+                        onChange={(e) => handleFileChange(e, Number(values.maxPictures))} // Convert to number here
                       />
                     </Button>
                     {errors.images && touched.images && <div style={{ color: 'red' }}>{errors.images}</div>}
@@ -179,7 +184,7 @@ export default function AddVehicle() {
                     <Box display="flex" flexWrap="wrap" gap={2} mt={2}>
                       {imageFiles.map((file, index) => (
                         <Box key={index} position="relative" width="80px" height="80px">
-                          <img
+                          <Image
                             src={URL.createObjectURL(file)}
                             alt="Selected"
                             style={{

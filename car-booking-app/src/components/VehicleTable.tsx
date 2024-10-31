@@ -1,4 +1,5 @@
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
+import Image from 'next/image';
 
 interface Vehicle {
   carModel: string;
@@ -31,7 +32,7 @@ export default function VehicleTable({ vehicles }: { vehicles: Vehicle[] }) {
               <TableCell>{vehicle.city}</TableCell>
               <TableCell>
                 {vehicle.images.map((image, imgIndex) => (
-                  <img
+                  <Image
                     key={imgIndex}
                     src={image.url}
                     alt={image.fileName}
